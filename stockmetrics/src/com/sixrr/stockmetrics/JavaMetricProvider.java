@@ -21,6 +21,8 @@ import com.sixrr.metrics.PrebuiltMetricProfile;
 import com.sixrr.stockmetrics.classMetrics.*;
 import com.sixrr.stockmetrics.i18n.StockMetricsBundle;
 import com.sixrr.stockmetrics.interfaceMetrics.*;
+import com.sixrr.stockmetrics.methodCalculators.DistinctOperandsCountCalculator;
+import com.sixrr.stockmetrics.methodCalculators.HalsteadDifficultyMethodCalculator;
 import com.sixrr.stockmetrics.methodMetrics.*;
 import com.sixrr.stockmetrics.moduleMetrics.*;
 import com.sixrr.stockmetrics.packageMetrics.*;
@@ -351,6 +353,7 @@ public class JavaMetricProvider implements MetricProvider {
         out.add(createMartinProfile());
         out.add(createMoodProfile());
         out.add(createTestProfile());
+        out.add(createFaultPredictionsProfile());
         return out;
     }
 
@@ -503,6 +506,32 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(NumTestMethodsModuleMetric.class);
         profile.addMetric(NumTestMethodsPackageMetric.class);
         profile.addMetric(NumTestMethodsProjectMetric.class);
+        return profile;
+    }
+
+    private static PrebuiltMetricProfile createFaultPredictionsProfile() {
+        //todo name
+        final PrebuiltMetricProfile profile =
+                new PrebuiltMetricProfile(StockMetricsBundle.message("fault.predictions.metrics.profile.name"));
+        profile.addMetric(HalsteadVocabularyMethodMetric.class);
+        profile.addMetric(DistinctOperatorsMetric.class);
+        profile.addMetric(DistinctOperandsMetric.class);
+        profile.addMetric(OperadsCountMetric.class);
+        profile.addMetric(OperatorsCountMetric.class);
+        profile.addMetric(HalsteadLengthMethodMetric.class);
+        profile.addMetric(LinesOfCodeMethodMetric.class);
+        profile.addMetric(HalsteadVolumeMethodMetric.class);
+        profile.addMetric(HalsteadDifficultyMethodMetric.class);
+        profile.addMetric(HalsteadEffortMethodMetric.class);
+        //profile.addMetric(BlankLinesCountMetric.class);
+        profile.addMetric(ConditionCountMetric.class);
+        profile.addMetric(BranchCountMetric.class);
+        profile.addMetric(DecisionCountMetric.class);
+        profile.addMetric(CyclomaticComplexityMetric.class);
+        profile.addMetric(HalsteadProgramLevelMetric.class);
+        profile.addMetric(CommentLinesOfCodeMethodMetric.class);
+        profile.addMetric(DesignComplexityMetric.class);
+        profile.addMetric(FormalParametersCountMethodMetric.class);
         return profile;
     }
 }

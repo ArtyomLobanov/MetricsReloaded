@@ -479,7 +479,7 @@
   <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="MetricsReloaded" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin" singleton="true">
       <module name="MetricsReloaded" />
-      <option name="VM_PARAMETERS" value="-XX:+UseCompressedOops -XX:MaxPermSize=250m -Xmx250m -Dcheck.psi.is.valid=true -Didea.is.internal=true -Didea.debug.mode=true -ea" />
+      <option name="VM_PARAMETERS" value="-XX:MaxPermSize=250m -Xmx250m -Dcheck.psi.is.valid=true -Didea.is.internal=true -Didea.debug.mode=true -ea" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <log_file path="$USER_HOME$/Library/Caches/IntelliJIdea14/plugins-sandbox/system/log/idea.log" checked="false" skipped="true" show_all="false" alias="IDEA LOG" />
       <RunnerSettings RunnerId="Debug">
