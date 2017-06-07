@@ -523,7 +523,7 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(HalsteadVolumeMethodMetric.class);
         profile.addMetric(HalsteadDifficultyMethodMetric.class);
         profile.addMetric(HalsteadEffortMethodMetric.class);
-        //profile.addMetric(BlankLinesCountMetric.class);
+        profile.addMetric(BlankLinesCountMethodMetric.class);
         profile.addMetric(ConditionCountMetric.class);
         profile.addMetric(BranchCountMetric.class);
         profile.addMetric(DecisionCountMetric.class);
@@ -532,6 +532,8 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(CommentLinesOfCodeMethodMetric.class);
         profile.addMetric(DesignComplexityMetric.class);
         profile.addMetric(FormalParametersCountMethodMetric.class);
+        // todo add this metric for methods
+        //profile.addMetric(DesignDensityMetric.class);
         return profile;
     }
 }
