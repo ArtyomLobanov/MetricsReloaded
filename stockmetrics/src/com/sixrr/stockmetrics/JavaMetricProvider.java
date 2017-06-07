@@ -511,7 +511,6 @@ public class JavaMetricProvider implements MetricProvider {
     }
 
     private static PrebuiltMetricProfile createFaultPredictionsProfile() {
-        //todo name
         final PrebuiltMetricProfile profile =
                 new PrebuiltMetricProfile(StockMetricsBundle.message("fault.predictions.metrics.profile.name"));
         profile.addMetric(HalsteadVocabularyMethodMetric.class);
