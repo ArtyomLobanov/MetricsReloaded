@@ -19,29 +19,21 @@ package com.sixrr.faultPredictions.plugin;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.analysis.BaseAnalysisAction;
-import com.intellij.ide.ui.AppearanceOptionsTopHitProvider;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
 import com.sixrr.faultPredictions.classification.FaultPredictor;
-import com.sixrr.faultPredictions.classification.InstancesCreator;
+import com.sixrr.faultPredictions.model.AnalyzedEntity;
 import com.sixrr.metrics.MetricCategory;
 import com.sixrr.metrics.metricModel.MetricsExecutionContextImpl;
-import com.sixrr.metrics.metricModel.MetricsResult;
+import com.sixrr.metrics.metricModel.MetricsRun;
 import com.sixrr.metrics.metricModel.MetricsRunImpl;
-import com.sixrr.metrics.profile.MetricInstance;
 import com.sixrr.metrics.profile.MetricsProfile;
 import com.sixrr.metrics.profile.MetricsProfileRepository;
 import com.sixrr.metrics.utils.MetricsReloadedBundle;
 import com.sixrr.stockmetrics.i18n.StockMetricsBundle;
 import org.jetbrains.annotations.NotNull;
-import weka.core.Instances;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 import static com.intellij.notification.NotificationType.ERROR;
 import static com.intellij.notification.NotificationType.INFORMATION;
@@ -61,17 +53,7 @@ public class FaultPredictionsAction extends BaseAnalysisAction {
         final MetricsProfileRepository repository = MetricsProfileRepository.getInstance();
         final MetricsProfile profile =
                 repository.getProfileForName(StockMetricsBundle.message("fault.predictions.metrics.profile.name"));
-        try {
-            PrintWriter out = new PrintWriter(new File("C:\\workspace\\pro.txt"));
-            out.println(profile.getName());
-            profile.getMetricInstances().stream()
-                    .filter(MetricInstance::isEnabled)
-                    .forEach(m -> out.println(m.getMetric().getClass().getName()));
-            out.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        final MetricsRunImpl metricsRun = new MetricsRunImpl();
+        final MetricsRun metricsRun = new MetricsRunImpl();
         new MetricsExecutionContextImpl(project, analysisScope) {
 
             @Override
@@ -83,16 +65,17 @@ public class FaultPredictionsAction extends BaseAnalysisAction {
                     showNotification(String.format(ERROR_TEXT_TEMPLATE, "predictor loading", e.getMessage()), ERROR);
                     return;
                 }
-                final Instances instances;
+                final AnalyzedEntity[] analyzedEntities;
                 try {
-                    MetricsResult result = metricsRun.getResultsForCategory(MetricCategory.Method);
-                    instances = InstancesCreator.createInstances(result);
+                    analyzedEntities = faultPredictor.analyze(metricsRun.getResultsForCategory(MetricCategory.Method));
                 } catch (Exception e) {
-                    showNotification(String.format(ERROR_TEXT_TEMPLATE, "converting values of metrics to features",
-                            e.getMessage()), ERROR);
+                    showNotification(String.format(ERROR_TEXT_TEMPLATE, "data analyzing", e.getMessage()), ERROR);
                     return;
                 }
-
+                //todo use normal way to show results!!
+                for (AnalyzedEntity entity : analyzedEntities) {
+                    showNotification(entity.getName() + " " + entity.isDefective(), INFORMATION);
+                }
                 showNotification("Analysis completed", INFORMATION);
             }
         }.execute(profile, metricsRun);

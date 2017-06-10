@@ -16,41 +16,47 @@
 
 package com.sixrr.faultPredictions.classification;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import com.sixrr.faultPredictions.model.AnalyzedEntity;
+import com.sixrr.metrics.metricModel.MetricsResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.Instances;
 
 import java.io.*;
 
 public class FaultPredictor {
     private static final String PATH_TO_CLASSIFIER = "/classifier.object";
+    private static FaultPredictor defaultPredictor;
     private final Classifier classifier;
 
     private FaultPredictor(@NotNull Classifier classifier) throws IOException, ClassNotFoundException {
         this.classifier = classifier;
     }
 
-    @Nullable
+    @NotNull
     public static FaultPredictor load(String path) throws PredictorLoadingException, IOException {
         try (FileInputStream input = new FileInputStream(path);) {
             return readPredictor(input);
         }
     }
 
-    @Nullable
+    @NotNull
     public static FaultPredictor loadDefaultPredictor() throws PredictorLoadingException, IOException {
-        try (InputStream input = FaultPredictor.class.getResourceAsStream(PATH_TO_CLASSIFIER)){
+        if (defaultPredictor != null) {
+            return defaultPredictor;
+        }
+        try (InputStream input = FaultPredictor.class.getResourceAsStream(PATH_TO_CLASSIFIER)) {
             if (input == null) {
                 throw new PredictorLoadingException("Resource file wasn't found: " + PATH_TO_CLASSIFIER);
             }
-            return readPredictor(input);
+            defaultPredictor = readPredictor(input);
         }
+        return defaultPredictor;
     }
 
-    @Nullable
+    @NotNull
     private static FaultPredictor readPredictor(InputStream input) throws IOException, PredictorLoadingException {
         try (ObjectInputStream objectInputStream = new ObjectInputStream(input)) {
             return new FaultPredictor((Classifier) objectInputStream.readObject());
@@ -59,20 +65,34 @@ public class FaultPredictor {
         }
     }
 
-    public boolean isDefective(Instance instance) {
+    public AnalyzedEntity[] analyze(MetricsResult metricsResult) throws ClassificationException {
+        final Instances instances = InstancesCreator.createInstances(metricsResult);
+        final String[] entities = metricsResult.getMeasuredObjects();
+        final AnalyzedEntity[] results = new AnalyzedEntity[entities.length];
         try {
-            return classifier.distributionForInstance(instance)[1] > 0.5;
+            for (int i = 0; i < entities.length; i++) {
+                final Instance instance = instances.instance(i);
+                final double isDefective = classifier.distributionForInstance(instance)[1];
+                results[i] = new AnalyzedEntity(entities[i], "no comment", isDefective);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Something went wrong", e);
+            throw new ClassificationException("Error occurred during classification: " + e.getMessage(), e);
         }
+        return results;
     }
 
-    public static class PredictorLoadingException extends Exception {
+    public static final class PredictorLoadingException extends Exception {
         private PredictorLoadingException(String message) {
             super(message);
         }
 
         private PredictorLoadingException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static final class ClassificationException extends Exception {
+        public ClassificationException(String message, Throwable cause) {
             super(message, cause);
         }
     }

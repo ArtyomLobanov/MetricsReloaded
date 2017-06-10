@@ -29,72 +29,54 @@ import weka.core.Instances;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class InstancesCreator {
+final class InstancesCreator {
 
     private static final double HALSTEAD_ERROR_SCALE = 1.0 / 3000;
     private static final double HALSTEAD_TIME_SCALE = 1.0 / 18;
-    private static final Map<Attribute, AttributeConverters> converters = new HashMap<>();
+    private static final Attribute CLASS_ATTRIBUTE;
+    private static final Map<String, AttributeConverters> converters = new HashMap<>();
 
     static {
-        converters.put(new Attribute("total_loc"),
-                new DifferenceConverter(LinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("blank_loc"),
-                new DifferenceConverter(BlankLinesCountMethodMetric.class));
-        converters.put(new Attribute("comment_loc"),
-                new DifferenceConverter(CommentLinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("code_and_comment_loc"),
-                new DifferenceConverter(LinesOfCodeMethodMetric.class, BlankLinesCountMethodMetric.class));
-        converters.put(new Attribute("executable_loc"),
-                new DifferenceConverter(LinesOfCodeMethodMetric.class, BlankLinesCountMethodMetric.class,
-                        CommentLinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("unique_operands"),
-                new DifferenceConverter(DistinctOperandsMetric.class));
-        converters.put(new Attribute("unique_operators"),
-                new DifferenceConverter(DistinctOperatorsMetric.class));
-        converters.put(new Attribute("total_operands"),
-                new DifferenceConverter(OperadsCountMetric.class));
-        converters.put(new Attribute("total_operators"),
-                new DifferenceConverter(OperatorsCountMetric.class));
-        converters.put(new Attribute("halstead_vocabulary"),
-                new DifferenceConverter(HalsteadVocabularyMethodMetric.class));
-        converters.put(new Attribute("halstead_length"),
-                new DifferenceConverter(HalsteadLengthMethodMetric.class));
-        converters.put(new Attribute("halstead_volume"),
-                new DifferenceConverter(HalsteadVolumeMethodMetric.class));
-        converters.put(new Attribute("halstead_level"),
-                new DifferenceConverter(HalsteadProgramLevelMetric.class));
-        converters.put(new Attribute("halstead_difficulty"),
-                new DifferenceConverter(HalsteadDifficultyMethodMetric.class));
-        converters.put(new Attribute("halstead_effort"),
-                new DifferenceConverter(HalsteadEffortMethodMetric.class));
-        converters.put(new Attribute("halstead_error"),
-                new ScaledConverter(HalsteadVolumeMethodMetric.class, HALSTEAD_ERROR_SCALE));
-        converters.put(new Attribute("halstead_time"),
-                new ScaledConverter(HalsteadEffortMethodMetric.class, HALSTEAD_TIME_SCALE));
-        converters.put(new Attribute("branch_count"),
-                new DifferenceConverter(BranchCountMetric.class));
-        converters.put(new Attribute("decision_count"),
-                new DifferenceConverter(DecisionCountMetric.class));
-        converters.put(new Attribute("condition_count"),
-                new DifferenceConverter(ConditionCountMetric.class));
-        converters.put(new Attribute("cyclomatic_complexity"),
-                new DifferenceConverter(CyclomaticComplexityMetric.class));
-        converters.put(new Attribute("cyclomatic_density"),
-                new QuotientConverter(CyclomaticComplexityMetric.class, LinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("decision_density"),
-                new QuotientConverter(DecisionCountMetric.class, LinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("design_complexity"),
-                new DifferenceConverter(DesignComplexityMetric.class));
-        converters.put(new Attribute("design_density"),
-                new DifferenceConverter(DesignDensityMetric.class));
-        converters.put(new Attribute("normalized_cyclomatic_complexity"),
-                new QuotientConverter(CyclomaticComplexityMetric.class, LinesOfCodeMethodMetric.class));
-        converters.put(new Attribute("formal_parameters"),
-                new DifferenceConverter(FormalParametersCountMethodMetric.class));
+        final FastVector classValues = new FastVector(2);
+        classValues.addElement("false");
+        classValues.addElement("true");
+        CLASS_ATTRIBUTE = new Attribute("defects", classValues);
+        converters.put("total_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class));
+        converters.put("blank_loc", new DifferenceConverter(BlankLinesCountMethodMetric.class));
+        converters.put("comment_loc", new DifferenceConverter(CommentLinesOfCodeMethodMetric.class));
+        converters.put("code_and_comment_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
+                BlankLinesCountMethodMetric.class));
+        converters.put("executable_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
+                BlankLinesCountMethodMetric.class, CommentLinesOfCodeMethodMetric.class));
+        converters.put("unique_operands", new DifferenceConverter(DistinctOperandsMetric.class));
+        converters.put("unique_operators", new DifferenceConverter(DistinctOperatorsMetric.class));
+        converters.put("total_operands", new DifferenceConverter(OperadsCountMetric.class));
+        converters.put("total_operators", new DifferenceConverter(OperatorsCountMetric.class));
+        converters.put("halstead_vocabulary", new DifferenceConverter(HalsteadVocabularyMethodMetric.class));
+        converters.put("halstead_length", new DifferenceConverter(HalsteadLengthMethodMetric.class));
+        converters.put("halstead_volume", new DifferenceConverter(HalsteadVolumeMethodMetric.class));
+        converters.put("halstead_level", new DifferenceConverter(HalsteadProgramLevelMetric.class));
+        converters.put("halstead_difficulty", new DifferenceConverter(HalsteadDifficultyMethodMetric.class));
+        converters.put("halstead_effort", new DifferenceConverter(HalsteadEffortMethodMetric.class));
+        converters.put("halstead_error", new ScaledConverter(HalsteadVolumeMethodMetric.class, HALSTEAD_ERROR_SCALE));
+        converters.put("halstead_time", new ScaledConverter(HalsteadEffortMethodMetric.class, HALSTEAD_TIME_SCALE));
+        converters.put("branch_count", new DifferenceConverter(BranchCountMetric.class));
+        converters.put("decision_count", new DifferenceConverter(DecisionCountMetric.class));
+        converters.put("condition_count", new DifferenceConverter(ConditionCountMetric.class));
+        converters.put("cyclomatic_complexity", new DifferenceConverter(CyclomaticComplexityMetric.class));
+        converters.put("cyclomatic_density", new QuotientConverter(CyclomaticComplexityMetric.class,
+                LinesOfCodeMethodMetric.class));
+        converters.put("decision_density", new QuotientConverter(DecisionCountMetric.class,
+                LinesOfCodeMethodMetric.class));
+        converters.put("design_complexity", new DifferenceConverter(DesignComplexityMetric.class));
+        converters.put("design_density", new DifferenceConverter(DesignDensityMetric.class));
+        converters.put("normalized_cyclomatic_complexity", new QuotientConverter(CyclomaticComplexityMetric.class,
+                LinesOfCodeMethodMetric.class));
+        converters.put("formal_parameters", new DifferenceConverter(FormalParametersCountMethodMetric.class));
+        converters.put(CLASS_ATTRIBUTE.name(), (r, m, t) -> Double.valueOf(Instance.missingValue()));
     }
 
     private InstancesCreator() {
@@ -104,18 +86,24 @@ public class InstancesCreator {
         final Map<Class<? extends Metric>, Metric> metrics = Arrays.stream(metricsResult.getMetrics())
                 .collect(Collectors.toMap(Metric::getClass, Function.identity()));
         final FastVector attributes = new FastVector(converters.size());
-        converters.keySet().forEach(attributes::addElement);
+        converters.keySet().stream()
+                .filter(s -> !s.equals(CLASS_ATTRIBUTE.name()))
+                .map(Attribute::new)
+                .forEach(attributes::addElement);
+        attributes.addElement(CLASS_ATTRIBUTE.copy());
         final String[] methods = metricsResult.getMeasuredObjects();
         final Instances instances = new Instances("tested methods", attributes, methods.length);
+        instances.setClass(CLASS_ATTRIBUTE);
         for (String method : methods) {
-            final Instance instance = new Instance(attributes.size());
-            for (Entry<Attribute, AttributeConverters> entry : converters.entrySet()) {
-                final Double value = entry.getValue().getValue(metricsResult, metrics, method);
-                if (value != null) {
-                    instance.setValue(entry.getKey(), value.doubleValue());
-                }
+            final double[] attributesValues = new double[attributes.size()];
+            for (int i = 0; i < instances.numAttributes(); i++) {
+                final String attribute = instances.attribute(i).name();
+                final Double value = converters.get(attribute).getValue(metricsResult, metrics, method);
+                attributesValues[i] = value == null ? Instance.missingValue() : value.doubleValue();
             }
+            final Instance instance = new Instance(1.0, attributesValues);
             instances.add(instance);
+            instance.setDataset(instances);
         }
         return instances;
     }

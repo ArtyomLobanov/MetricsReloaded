@@ -14,25 +14,28 @@
  *  limitations under the License.
  */
 
-package com.sixrr.stockmetrics.methodCalculators;
+package com.sixrr.faultPredictions.model;
 
-import com.intellij.psi.JavaRecursiveElementVisitor;
-import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.PsiMethod;
-import com.sixrr.stockmetrics.utils.LineUtil;
+public class AnalyzedEntity {
+    private final String name;
+    private final String comment;
+    private final double isDefective;
 
-public class BlankLinesCountMethodCalculator extends MethodCalculator {
-
-    @Override
-    protected PsiElementVisitor createVisitor() {
-        return new Visitor();
+    public AnalyzedEntity(String name, String comment, double isDefective) {
+        this.name = name;
+        this.comment = comment;
+        this.isDefective = isDefective;
     }
 
-    private class Visitor extends JavaRecursiveElementVisitor {
-        @Override
-        public void visitMethod(PsiMethod method) {
-            super.visitMethod(method);
-            postMetric(method, (double) LineUtil.countBlankLines(method));
-        }
+    public String getName() {
+        return name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public double isDefective() {
+        return isDefective;
     }
 }
