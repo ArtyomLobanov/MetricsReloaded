@@ -21,8 +21,6 @@ import com.sixrr.metrics.PrebuiltMetricProfile;
 import com.sixrr.stockmetrics.classMetrics.*;
 import com.sixrr.stockmetrics.i18n.StockMetricsBundle;
 import com.sixrr.stockmetrics.interfaceMetrics.*;
-import com.sixrr.stockmetrics.methodCalculators.DistinctOperandsCountCalculator;
-import com.sixrr.stockmetrics.methodCalculators.HalsteadDifficultyMethodCalculator;
 import com.sixrr.stockmetrics.methodMetrics.*;
 import com.sixrr.stockmetrics.moduleMetrics.*;
 import com.sixrr.stockmetrics.packageMetrics.*;
@@ -532,7 +530,6 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(CommentLinesOfCodeMethodMetric.class);
         profile.addMetric(DesignComplexityMetric.class);
         profile.addMetric(FormalParametersCountMethodMetric.class);
-        // todo add this metric for methods
         //profile.addMetric(DesignDensityMetric.class);
         return profile;
     }

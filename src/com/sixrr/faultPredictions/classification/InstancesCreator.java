@@ -20,6 +20,7 @@ import com.sixrr.metrics.Metric;
 import com.sixrr.metrics.metricModel.MetricsResult;
 import com.sixrr.stockmetrics.methodMetrics.*;
 import com.sixrr.stockmetrics.moduleMetrics.DesignDensityMetric;
+import org.jetbrains.annotations.Nullable;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -88,12 +89,15 @@ public class InstancesCreator {
                 new QuotientConverter(DecisionCountMetric.class, LinesOfCodeMethodMetric.class));
         converters.put(new Attribute("design_complexity"),
                 new DifferenceConverter(DesignComplexityMetric.class));
-//        converters.put(new Attribute("design_density"),
-//                new DifferenceConverter(DesignDensityMetric.class));
+        converters.put(new Attribute("design_density"),
+                new DifferenceConverter(DesignDensityMetric.class));
         converters.put(new Attribute("normalized_cyclomatic_complexity"),
                 new QuotientConverter(CyclomaticComplexityMetric.class, LinesOfCodeMethodMetric.class));
         converters.put(new Attribute("formal_parameters"),
                 new DifferenceConverter(FormalParametersCountMethodMetric.class));
+    }
+
+    private InstancesCreator() {
     }
 
     public static Instances createInstances(MetricsResult metricsResult) {
@@ -107,11 +111,9 @@ public class InstancesCreator {
             final Instance instance = new Instance(attributes.size());
             for (Entry<Attribute, AttributeConverters> entry : converters.entrySet()) {
                 final Double value = entry.getValue().getValue(metricsResult, metrics, method);
-                if (value == null) {
-                    //todo
-                    throw new RuntimeException("Metrics wasn't calculated: " + entry.getKey().name());
+                if (value != null) {
+                    instance.setValue(entry.getKey(), value.doubleValue());
                 }
-                instance.setValue(entry.getKey(), value.doubleValue());
             }
             instances.add(instance);
         }
@@ -120,6 +122,7 @@ public class InstancesCreator {
 
     @FunctionalInterface
     private interface AttributeConverters {
+        @Nullable
         Double getValue(MetricsResult result, Map<Class<? extends Metric>, Metric> metrics, String target);
     }
 
@@ -134,17 +137,17 @@ public class InstancesCreator {
         }
 
         @Override
+        @Nullable
         public Double getValue(MetricsResult result, Map<Class<? extends Metric>, Metric> metrics, String target) {
             Double value = result.getValueForMetric(metrics.get(metric), target);
             if (value == null) {
-                throw new RuntimeException(metric.getName() + " wasn't calculated");
+                return null;
             }
             double res = value.doubleValue();
             for (Class<? extends Metric> metricToSubtract : metricsToSubtract) {
                 value = result.getValueForMetric(metrics.get(metricToSubtract), target);
                 if (value == null) {
-                    throw new RuntimeException(metricToSubtract.getName() + " wasn't calculated");
-//                    return null;
+                    return null;
                 }
                 res -= value.doubleValue();
             }
@@ -162,6 +165,7 @@ public class InstancesCreator {
         }
 
         @Override
+        @Nullable
         public Double getValue(MetricsResult result, Map<Class<? extends Metric>, Metric> metrics, String target) {
             final Double value = result.getValueForMetric(metrics.get(metric), target);
             return value == null ? null : Double.valueOf(value.doubleValue() * scale);
@@ -179,15 +183,12 @@ public class InstancesCreator {
 
 
         @Override
+        @Nullable
         public Double getValue(MetricsResult result, Map<Class<? extends Metric>, Metric> metrics, String target) {
             final Double numerator = result.getValueForMetric(metrics.get(numeratorMetric), target);
             final Double denominator = result.getValueForMetric(metrics.get(denominatorMetric), target);
-            if (numerator == null) {
-                //todo
-                throw new RuntimeException("Metrics wasn't calculated: " + numeratorMetric.getName());
-            } else if (denominator == null) {
-                //todo
-                throw new RuntimeException("Metrics wasn't calculated: " + denominatorMetric.getName());
+            if (numerator == null || denominator == null) {
+                return null;
             }
             return Double.valueOf(numerator.doubleValue() / denominator.doubleValue());
         }

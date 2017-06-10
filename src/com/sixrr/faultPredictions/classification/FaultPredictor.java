@@ -16,22 +16,46 @@
 
 package com.sixrr.faultPredictions.classification;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 
 public class FaultPredictor {
     private static final String PATH_TO_CLASSIFIER = "/classifier.object";
     private final Classifier classifier;
 
-    public FaultPredictor() throws IOException, ClassNotFoundException {
-        try (InputStream resourceStream = FaultPredictor.class.getResourceAsStream(PATH_TO_CLASSIFIER);
-             ObjectInputStream input = new ObjectInputStream(resourceStream)) {
-            classifier = (Classifier) input.readObject();
+    private FaultPredictor(@NotNull Classifier classifier) throws IOException, ClassNotFoundException {
+        this.classifier = classifier;
+    }
+
+    @Nullable
+    public static FaultPredictor load(String path) throws PredictorLoadingException, IOException {
+        try (FileInputStream input = new FileInputStream(path);) {
+            return readPredictor(input);
+        }
+    }
+
+    @Nullable
+    public static FaultPredictor loadDefaultPredictor() throws PredictorLoadingException, IOException {
+        try (InputStream input = FaultPredictor.class.getResourceAsStream(PATH_TO_CLASSIFIER)){
+            if (input == null) {
+                throw new PredictorLoadingException("Resource file wasn't found: " + PATH_TO_CLASSIFIER);
+            }
+            return readPredictor(input);
+        }
+    }
+
+    @Nullable
+    private static FaultPredictor readPredictor(InputStream input) throws IOException, PredictorLoadingException {
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(input)) {
+            return new FaultPredictor((Classifier) objectInputStream.readObject());
+        } catch (ObjectStreamException | ClassNotFoundException e) {
+            throw new PredictorLoadingException("Can't read classifier because it has unexpected format", e);
         }
     }
 
@@ -40,6 +64,16 @@ public class FaultPredictor {
             return classifier.distributionForInstance(instance)[1] > 0.5;
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong", e);
+        }
+    }
+
+    public static class PredictorLoadingException extends Exception {
+        private PredictorLoadingException(String message) {
+            super(message);
+        }
+
+        private PredictorLoadingException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }
