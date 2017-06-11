@@ -19,7 +19,6 @@ package com.sixrr.faultPredictions.classification;
 import com.sixrr.metrics.Metric;
 import com.sixrr.metrics.metricModel.MetricsResult;
 import com.sixrr.stockmetrics.methodMetrics.*;
-import com.sixrr.stockmetrics.moduleMetrics.DesignDensityMetric;
 import org.jetbrains.annotations.Nullable;
 import weka.core.Attribute;
 import weka.core.FastVector;

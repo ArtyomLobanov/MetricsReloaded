@@ -530,7 +530,7 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(CommentLinesOfCodeMethodMetric.class);
         profile.addMetric(DesignComplexityMetric.class);
         profile.addMetric(FormalParametersCountMethodMetric.class);
-        //profile.addMetric(DesignDensityMetric.class);
+        profile.addMetric(DesignDensityMetric.class);
         return profile;
     }
 }
