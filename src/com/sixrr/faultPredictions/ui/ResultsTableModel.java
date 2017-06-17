@@ -17,34 +17,35 @@
 package com.sixrr.faultPredictions.ui;
 
 import com.sixrr.faultPredictions.model.AnalyzedEntity;
-import com.sixrr.metrics.profile.MetricsProfileRepository;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.stream.IntStream;
 
 class ResultsTableModel extends AbstractTableModel {
 
     private static final String[] COLUMNS = {"Method", "Is defect", "Comment"};
-    private final AnalyzedEntity[] entities;
-    private final int[] rowPermutation;
-//    private int sortColumn = -1;
-//    private boolean ascending;
+    private AnalyzedEntity[] entities;
+    private int sortColumn = 0;
+    private boolean ascending = true;
 
-    ResultsTableModel(@NotNull AnalyzedEntity[] entities) {
+    ResultsTableModel() {
+        entities = new AnalyzedEntity[0];
+    }
+
+    public void updateResults(AnalyzedEntity[] entities) {
         this.entities = entities;
-        rowPermutation = IntStream.range(0, entities.length).toArray();
         sort();
+        fireTableStructureChanged();
+        fireTableDataChanged();
     }
 
     public void changeSort(int column, boolean ascending) {
-//        sortColumn = column;
-//        this.ascending = ascending;
-//        sort();
-//        fireTableDataChanged();
-//        MetricsProfileRepository.getInstance().persistCurrentProfile();
+        sortColumn = column;
+        this.ascending = ascending;
+        sort();
+        fireTableDataChanged();
     }
 
     @Override
@@ -65,20 +66,35 @@ class ResultsTableModel extends AbstractTableModel {
     @Override
     @Nullable
     public Object getValueAt(int rowIndex, int columnIndex) {
-        final AnalyzedEntity entity = entities[rowPermutation[rowIndex]];
-        switch (columnIndex) {
-            case 0 : return entity.getName();
-            case 1 : return Double.toString(entity.isDefective());
-            case 2 : return entity.getComment();
+        return toStringValue(entities[rowIndex], columnIndex);
+    }
+
+    public int getSortColumn() {
+        return sortColumn;
+    }
+
+    public boolean isAscending() {
+        return ascending;
+    }
+
+    private static String toStringValue(AnalyzedEntity entity, int column) {
+        switch (column) {
+            case 0:
+                return entity.getName();
+            case 1:
+                return Double.toString(entity.isDefective());
+            case 2:
+                return entity.getComment();
         }
-        throw new IllegalArgumentException("Unexpected column index: " + columnIndex);
+        throw new IllegalArgumentException("Unexpected column index: " + column);
     }
 
     private void sort() {
-//        if (sortColumn == 1) {
-//            rowPermutation = IntStream.range(0, entities.length).boxed()
-//                    .sorted(Comparator.comparing(i -> sortColumn == 0? entities[i].getName() : entities[i].getComment()))
-//                    .mapToInt(Integer::intValue).toArray();
-//        }
+        final Comparator<AnalyzedEntity> mainComparator = Comparator.comparing(e -> toStringValue(e, sortColumn));
+        if (ascending) {
+            Arrays.sort(entities, mainComparator);
+        } else {
+            Arrays.sort(entities, mainComparator.reversed());
+        }
     }
 }

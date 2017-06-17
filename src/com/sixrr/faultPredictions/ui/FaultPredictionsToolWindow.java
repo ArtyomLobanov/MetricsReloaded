@@ -29,9 +29,6 @@ import com.sixrr.faultPredictions.model.AnalyzedEntity;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import java.awt.*;
 
 public final class FaultPredictionsToolWindow implements Disposable {
 
@@ -39,7 +36,7 @@ public final class FaultPredictionsToolWindow implements Disposable {
 
     private final Project project;
     private ToolWindow myToolWindow = null;
-    private JBTable table;
+    private ResultsTableModel tableModel;
 
 
     private FaultPredictionsToolWindow(@NotNull Project project) {
@@ -56,8 +53,12 @@ public final class FaultPredictionsToolWindow implements Disposable {
     }
 
     private void createTable() {
-        table = new AutoResizableTable();
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tableModel = new ResultsTableModel();
+        final JBTable table = new JBTable();
+        table.setModel(tableModel);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        table.getTableHeader().addMouseListener(new ResultsTableHeaderMouseListener(table));
+        table.getTableHeader().setDefaultRenderer(new HeaderRenderer(tableModel, SwingConstants.LEFT));
         final JComponent component = ScrollPaneFactory.createScrollPane(table);
         final Content content = myToolWindow.getContentManager().getFactory()
                 .createContent(component, "Fault predictions table", true);
@@ -69,7 +70,7 @@ public final class FaultPredictionsToolWindow implements Disposable {
     public void show(AnalyzedEntity[] data) {
         myToolWindow.setTitle("Fault predictions result");
         myToolWindow.setAvailable(true, null);
-        table.setModel(new ResultsTableModel(data));
+        tableModel.updateResults(data);
         myToolWindow.show(null);
     }
 
@@ -77,17 +78,5 @@ public final class FaultPredictionsToolWindow implements Disposable {
     public void dispose() {
         final ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
         toolWindowManager.unregisterToolWindow(WINDOW_ID);
-    }
-
-    private static class AutoResizableTable extends JBTable {
-        @Override
-        @NotNull
-        public Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
-            final Component component = super.prepareRenderer(renderer, row, column);
-            final int rendererWidth = component.getPreferredSize().width + getIntercellSpacing().width;
-            final TableColumn tableColumn = getColumnModel().getColumn(column);
-            tableColumn.setPreferredWidth(Math.max(rendererWidth, tableColumn.getPreferredWidth()));
-            return component;
-        }
     }
 }
