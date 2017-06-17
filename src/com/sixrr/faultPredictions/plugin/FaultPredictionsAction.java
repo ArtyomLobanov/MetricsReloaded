@@ -22,15 +22,19 @@ import com.intellij.analysis.BaseAnalysisAction;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.WindowManager;
 import com.sixrr.faultPredictions.classification.FaultPredictor;
 import com.sixrr.faultPredictions.model.AnalyzedEntity;
+import com.sixrr.faultPredictions.ui.FaultPredictionsToolWindow;
 import com.sixrr.metrics.MetricCategory;
 import com.sixrr.metrics.metricModel.MetricsExecutionContextImpl;
 import com.sixrr.metrics.metricModel.MetricsRun;
 import com.sixrr.metrics.metricModel.MetricsRunImpl;
 import com.sixrr.metrics.profile.MetricsProfile;
 import com.sixrr.metrics.profile.MetricsProfileRepository;
+import com.sixrr.metrics.ui.metricdisplay.MetricsToolWindow;
 import com.sixrr.metrics.utils.MetricsReloadedBundle;
 import com.sixrr.stockmetrics.i18n.StockMetricsBundle;
 import org.jetbrains.annotations.NotNull;
@@ -72,10 +76,7 @@ public class FaultPredictionsAction extends BaseAnalysisAction {
                     showNotification(String.format(ERROR_TEXT_TEMPLATE, "data analyzing", e.getMessage()), ERROR);
                     return;
                 }
-                //todo use normal way to show results!!
-                for (AnalyzedEntity entity : analyzedEntities) {
-                    showNotification(entity.getName() + " " + entity.isDefective(), INFORMATION);
-                }
+                ServiceManager.getService(project, FaultPredictionsToolWindow.class).show(analyzedEntities);
                 showNotification("Analysis completed", INFORMATION);
             }
         }.execute(profile, metricsRun);

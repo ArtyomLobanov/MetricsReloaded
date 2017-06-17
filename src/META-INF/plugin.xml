@@ -60,6 +60,7 @@
     <applicationService serviceImplementation="com.sixrr.metrics.profile.MetricsProfileRepository"/>
     <projectService serviceInterface="com.sixrr.metrics.ui.metricdisplay.MetricsToolWindow"
                     serviceImplementation="com.sixrr.metrics.ui.metricdisplay.MetricsToolWindowImpl"/>
+    <projectService serviceImplementation="com.sixrr.faultPredictions.ui.FaultPredictionsToolWindow"/>
     <exportable serviceInterface="com.sixrr.metrics.profile.MetricsProfileRepository"/>
   </extensions>
   <extensions defaultExtensionNs="MetricsReloaded">
@@ -72,10 +73,6 @@
               text="Calculate Metrics..."/>
       <action id="Metrics.FaultPredictionsAction" class="com.sixrr.faultPredictions.plugin.FaultPredictionsAction"
               text="Fault predictions..."/>
-      <!--action id="Metrics.ViewOfflineMetricsResults"
-              class="com.sixrr.metrics.offline.ViewOfflineMetricsResultsAction"
-              text="View Offline Metrics Results...">
-      </action-->
       <add-to-group group-id="InspectCodeGroup" anchor="last"/>
     </group>
   </actions>
