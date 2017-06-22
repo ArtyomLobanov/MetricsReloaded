@@ -71,6 +71,4 @@ class HeaderRenderer extends DefaultTableCellRenderer {
             setIconTextGap(0);
         }
     }
-
-
 }

@@ -19,12 +19,12 @@ package com.sixrr.faultPredictions.model;
 public class AnalyzedEntity {
     private final String name;
     private final String comment;
-    private final double isDefective;
+    private final int defectiveness;
 
     public AnalyzedEntity(String name, String comment, double isDefective) {
         this.name = name;
         this.comment = comment;
-        this.isDefective = isDefective;
+        defectiveness = (int) Math.round(isDefective * 10 + 0.5);
     }
 
     public String getName() {
@@ -35,7 +35,7 @@ public class AnalyzedEntity {
         return comment;
     }
 
-    public double isDefective() {
-        return isDefective;
+    public int defectiveness() {
+        return defectiveness;
     }
 }

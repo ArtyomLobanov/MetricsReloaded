@@ -20,6 +20,7 @@ import com.sixrr.metrics.Metric;
 import com.sixrr.metrics.metricModel.MetricsResult;
 import com.sixrr.stockmetrics.methodMetrics.*;
 import org.jetbrains.annotations.Nullable;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -43,38 +44,38 @@ final class InstancesCreator {
         classValues.addElement("false");
         classValues.addElement("true");
         CLASS_ATTRIBUTE = new Attribute("defects", classValues);
-        converters.put("total_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class));
-        converters.put("blank_loc", new DifferenceConverter(BlankLinesCountMethodMetric.class));
-        converters.put("comment_loc", new DifferenceConverter(CommentLinesOfCodeMethodMetric.class));
-        converters.put("code_and_comment_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
-                BlankLinesCountMethodMetric.class));
-        converters.put("executable_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
-                BlankLinesCountMethodMetric.class, CommentLinesOfCodeMethodMetric.class));
-        converters.put("unique_operands", new DifferenceConverter(DistinctOperandsMetric.class));
-        converters.put("unique_operators", new DifferenceConverter(DistinctOperatorsMetric.class));
-        converters.put("total_operands", new DifferenceConverter(OperadsCountMetric.class));
-        converters.put("total_operators", new DifferenceConverter(OperatorsCountMetric.class));
-        converters.put("halstead_vocabulary", new DifferenceConverter(HalsteadVocabularyMethodMetric.class));
-        converters.put("halstead_length", new DifferenceConverter(HalsteadLengthMethodMetric.class));
-        converters.put("halstead_volume", new DifferenceConverter(HalsteadVolumeMethodMetric.class));
-        converters.put("halstead_level", new DifferenceConverter(HalsteadProgramLevelMetric.class));
-        converters.put("halstead_difficulty", new DifferenceConverter(HalsteadDifficultyMethodMetric.class));
-        converters.put("halstead_effort", new DifferenceConverter(HalsteadEffortMethodMetric.class));
-        converters.put("halstead_error", new ScaledConverter(HalsteadVolumeMethodMetric.class, HALSTEAD_ERROR_SCALE));
-        converters.put("halstead_time", new ScaledConverter(HalsteadEffortMethodMetric.class, HALSTEAD_TIME_SCALE));
         converters.put("branch_count", new DifferenceConverter(BranchCountMetric.class));
-        converters.put("decision_count", new DifferenceConverter(DecisionCountMetric.class));
         converters.put("condition_count", new DifferenceConverter(ConditionCountMetric.class));
         converters.put("cyclomatic_complexity", new DifferenceConverter(CyclomaticComplexityMetric.class));
         converters.put("cyclomatic_density", new QuotientConverter(CyclomaticComplexityMetric.class,
                 LinesOfCodeMethodMetric.class));
-        converters.put("decision_density", new QuotientConverter(DecisionCountMetric.class,
-                LinesOfCodeMethodMetric.class));
+        converters.put("decision_count", new DifferenceConverter(DecisionCountMetric.class));
         converters.put("design_complexity", new DifferenceConverter(DesignComplexityMetric.class));
         converters.put("design_density", new DifferenceConverter(DesignDensityMetric.class));
+        converters.put("executable_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
+                BlankLinesCountMethodMetric.class, CommentLinesOfCodeMethodMetric.class));
+        converters.put("formal_parameters", new DifferenceConverter(FormalParametersCountMethodMetric.class));
+        converters.put("halstead_difficulty", new DifferenceConverter(HalsteadDifficultyMethodMetric.class));
+        converters.put("halstead_effort", new DifferenceConverter(HalsteadEffortMethodMetric.class));
+        converters.put("halstead_error", new ScaledConverter(HalsteadVolumeMethodMetric.class, HALSTEAD_ERROR_SCALE));
+        converters.put("halstead_length", new DifferenceConverter(HalsteadLengthMethodMetric.class));
+        converters.put("halstead_level", new DifferenceConverter(HalsteadProgramLevelMetric.class));
+        converters.put("halstead_time", new ScaledConverter(HalsteadEffortMethodMetric.class, HALSTEAD_TIME_SCALE));
+        converters.put("halstead_volume", new DifferenceConverter(HalsteadVolumeMethodMetric.class));
         converters.put("normalized_cyclomatic_complexity", new QuotientConverter(CyclomaticComplexityMetric.class,
                 LinesOfCodeMethodMetric.class));
-        converters.put("formal_parameters", new DifferenceConverter(FormalParametersCountMethodMetric.class));
+        converters.put("total_operands", new DifferenceConverter(OperadsCountMetric.class));
+        converters.put("total_operators", new DifferenceConverter(OperatorsCountMetric.class));
+        converters.put("unique_operands", new DifferenceConverter(DistinctOperandsMetric.class));
+        converters.put("unique_operators", new DifferenceConverter(DistinctOperatorsMetric.class));
+        converters.put("total_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class));
+//        converters.put("blank_loc", new DifferenceConverter(BlankLinesCountMethodMetric.class));
+//        converters.put("comment_loc", new DifferenceConverter(CommentLinesOfCodeMethodMetric.class));
+//        converters.put("code_and_comment_loc", new DifferenceConverter(LinesOfCodeMethodMetric.class,
+//                BlankLinesCountMethodMetric.class));
+//        converters.put("halstead_vocabulary", new DifferenceConverter(HalsteadVocabularyMethodMetric.class));
+//        converters.put("decision_density", new QuotientConverter(DecisionCountMetric.class,
+//                LinesOfCodeMethodMetric.class));
         converters.put(CLASS_ATTRIBUTE.name(), (r, m, t) -> Double.valueOf(Instance.missingValue()));
     }
 
@@ -86,6 +87,7 @@ final class InstancesCreator {
                 .collect(Collectors.toMap(Metric::getClass, Function.identity()));
         final FastVector attributes = new FastVector(converters.size());
         converters.keySet().stream()
+                .sequential()
                 .filter(s -> !s.equals(CLASS_ATTRIBUTE.name()))
                 .map(Attribute::new)
                 .forEach(attributes::addElement);

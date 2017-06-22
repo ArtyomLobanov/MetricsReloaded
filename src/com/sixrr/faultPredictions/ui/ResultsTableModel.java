@@ -25,7 +25,7 @@ import java.util.Comparator;
 
 class ResultsTableModel extends AbstractTableModel {
 
-    private static final String[] COLUMNS = {"Method", "Is defect", "Comment"};
+    private static final String[] COLUMNS = {"Method", "Defectiveness", "Comment"};
     private AnalyzedEntity[] entities;
     private int sortColumn = 0;
     private boolean ascending = true;
@@ -82,7 +82,7 @@ class ResultsTableModel extends AbstractTableModel {
             case 0:
                 return entity.getName();
             case 1:
-                return Double.toString(entity.isDefective());
+                return Integer.toString(entity.defectiveness());
             case 2:
                 return entity.getComment();
         }
