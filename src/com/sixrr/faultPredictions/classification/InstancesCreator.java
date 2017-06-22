@@ -28,6 +28,7 @@ import weka.core.Instances;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ final class InstancesCreator {
     private static final double HALSTEAD_ERROR_SCALE = 1.0 / 3000;
     private static final double HALSTEAD_TIME_SCALE = 1.0 / 18;
     private static final Attribute CLASS_ATTRIBUTE;
-    private static final Map<String, AttributeConverters> converters = new HashMap<>();
+    private static final Map<String, AttributeConverters> converters = new LinkedHashMap<>();
 
     static {
         final FastVector classValues = new FastVector(2);
@@ -89,6 +90,7 @@ final class InstancesCreator {
         converters.keySet().stream()
                 .sequential()
                 .filter(s -> !s.equals(CLASS_ATTRIBUTE.name()))
+                .peek(System.out::println)
                 .map(Attribute::new)
                 .forEach(attributes::addElement);
         attributes.addElement(CLASS_ATTRIBUTE.copy());
