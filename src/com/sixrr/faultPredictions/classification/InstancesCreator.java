@@ -20,14 +20,12 @@ import com.sixrr.metrics.Metric;
 import com.sixrr.metrics.metricModel.MetricsResult;
 import com.sixrr.stockmetrics.methodMetrics.*;
 import org.jetbrains.annotations.Nullable;
-import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -90,7 +88,6 @@ final class InstancesCreator {
         converters.keySet().stream()
                 .sequential()
                 .filter(s -> !s.equals(CLASS_ATTRIBUTE.name()))
-                .peek(System.out::println)
                 .map(Attribute::new)
                 .forEach(attributes::addElement);
         attributes.addElement(CLASS_ATTRIBUTE.copy());
