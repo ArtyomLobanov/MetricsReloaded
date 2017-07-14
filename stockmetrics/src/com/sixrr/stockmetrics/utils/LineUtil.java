@@ -55,6 +55,29 @@ public final class LineUtil {
         return lines;
     }
 
+    public static int countBlankLines(PsiElement element) {
+        if (element instanceof PsiCompiledElement) {
+            return 0;
+        }
+        final String text = element.getText();
+        int lines = 0;
+        boolean onEmptyLine = true;
+        final char[] chars = text.toCharArray();
+        for (final char aChar : chars) {
+            if (aChar == '\n' || aChar == '\r') {
+                if (onEmptyLine) {
+                    lines++;
+                }
+                onEmptyLine = true;
+            } else if (aChar == ' ' || aChar == '\t') {
+                //don't do anything
+            } else {
+                onEmptyLine = false;
+            }
+        }
+        return lines;
+    }
+
     public static int countCommentOnlyLines(PsiComment comment) {
         final String text = comment.getText();
         int totalLines = countLines(text);

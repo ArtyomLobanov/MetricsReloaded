@@ -104,6 +104,7 @@ public class JavaMetricProvider implements MetricProvider {
         metrics.add(new TodoCommentCountClassMetric());
         metrics.add(new TrueCommentRatioClassMetric());
         metrics.add(new WeightedMethodComplexityMetric());
+        metrics.add(new BlankLinesCountClassMetric());
     }
 
     private static void initializeInterfaceMetrics(Collection<Metric> metrics) {
@@ -150,6 +151,7 @@ public class JavaMetricProvider implements MetricProvider {
         metrics.add(new HalsteadLengthMethodMetric());
         metrics.add(new HalsteadVocabularyMethodMetric());
         metrics.add(new HalsteadVolumeMethodMetric());
+        metrics.add(new HalsteadProgramLevelMetric());
         metrics.add(new JavadocLinesOfCodeMethodMetric());
         metrics.add(new LinesOfCodeMethodMetric());
         metrics.add(new LoopNestingDepthMetric());
@@ -181,6 +183,16 @@ public class JavaMetricProvider implements MetricProvider {
         metrics.add(new SourceLinesOfCodeMethodMetric());
         metrics.add(new TodoCommentCountMethodMetric());
         metrics.add(new TrueCommentRatioMethodMetric());
+        metrics.add(new ConditionCountMetric());
+        metrics.add(new DecisionCountMetric());
+        metrics.add(new OperadsCountMetric());
+        metrics.add(new OperatorsCountMetric());
+        metrics.add(new DistinctOperandsMetric());
+        metrics.add(new DistinctOperatorsMetric());
+        metrics.add(new BranchCountMetric());
+        metrics.add(new FormalParametersCountMethodMetric());
+        metrics.add(new BlankLinesCountMethodMetric());
+        metrics.add(new DesignDensityMetric());
     }
 
     private static void initializeModuleMetrics(Collection<Metric> metrics) {
@@ -340,6 +352,7 @@ public class JavaMetricProvider implements MetricProvider {
         out.add(createMartinProfile());
         out.add(createMoodProfile());
         out.add(createTestProfile());
+        out.add(createFaultPredictionsProfile());
         return out;
     }
 
@@ -492,6 +505,32 @@ public class JavaMetricProvider implements MetricProvider {
         profile.addMetric(NumTestMethodsModuleMetric.class);
         profile.addMetric(NumTestMethodsPackageMetric.class);
         profile.addMetric(NumTestMethodsProjectMetric.class);
+        return profile;
+    }
+
+    private static PrebuiltMetricProfile createFaultPredictionsProfile() {
+        final PrebuiltMetricProfile profile =
+                new PrebuiltMetricProfile(StockMetricsBundle.message("fault.predictions.metrics.profile.name"));
+        profile.addMetric(HalsteadVocabularyMethodMetric.class);
+        profile.addMetric(DistinctOperatorsMetric.class);
+        profile.addMetric(DistinctOperandsMetric.class);
+        profile.addMetric(OperadsCountMetric.class);
+        profile.addMetric(OperatorsCountMetric.class);
+        profile.addMetric(HalsteadLengthMethodMetric.class);
+        profile.addMetric(LinesOfCodeMethodMetric.class);
+        profile.addMetric(HalsteadVolumeMethodMetric.class);
+        profile.addMetric(HalsteadDifficultyMethodMetric.class);
+        profile.addMetric(HalsteadEffortMethodMetric.class);
+        profile.addMetric(BlankLinesCountMethodMetric.class);
+        profile.addMetric(ConditionCountMetric.class);
+        profile.addMetric(BranchCountMetric.class);
+        profile.addMetric(DecisionCountMetric.class);
+        profile.addMetric(CyclomaticComplexityMetric.class);
+        profile.addMetric(HalsteadProgramLevelMetric.class);
+        profile.addMetric(CommentLinesOfCodeMethodMetric.class);
+        profile.addMetric(DesignComplexityMetric.class);
+        profile.addMetric(FormalParametersCountMethodMetric.class);
+        profile.addMetric(DesignDensityMetric.class);
         return profile;
     }
 }
